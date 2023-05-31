@@ -274,17 +274,21 @@ USED-KEYS is used to omit certain keys from usage."
 																(lambda (it)
 																	(stringp (cdr (assq :key (cdr it)))))
 																flymenu-known-flymake-backends))
-				 (non-key-backends (seq-difference
-														flymenu-known-flymake-backends
-														key-defined-backends))
 				 (diags
-					(seq-uniq (remove t (append flymake-diagnostic-functions
-																			(mapcar #'car
-																							non-key-backends)))))
-				 (all-used-keys (append (mapcar (lambda (it)
-																					(cdr (assq :key (cdr it))))
-																				key-defined-backends)
-																used-keys))
+					(seq-uniq
+					 (seq-difference
+						(append
+						 (remove t flymake-diagnostic-functions)
+						 (mapcar #'car
+										 (seq-remove (pcase-lambda (`(,_k . ,v))
+																	 (stringp (cdr (assq :key v))))
+																 flymenu-known-flymake-backends)))
+						(mapcar 'car key-defined-backends))))
+				 (all-used-keys (append
+												 (mapcar (lambda (it)
+																	 (cdr (assq :key (cdr it))))
+																 key-defined-backends)
+												 used-keys))
 				 (shortcuts (flymenu-builder-generate-shortcuts
 										 diags
 										 (lambda (it)
@@ -295,16 +299,8 @@ USED-KEYS is used to omit certain keys from usage."
 										 (lambda (key value)
 											 (let
 													 ((props
-														 (seq-filter (pcase-lambda (`(,k . ,v))
-																					 (pcase k
-																						 (:key (stringp v))
-																						 (:description
-																							(or
-																							 (stringp
-																								v)
-																							 (functionp
-																								v)))
-																						 (_ t)))
+														 (seq-remove (pcase-lambda (`(,k . ,_v))
+																					 (eq k :key))
 																				 (cdr
 																					(assq value
 																								flymenu-known-flymake-backends)))))
