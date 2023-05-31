@@ -1,0 +1,58 @@
+* flymenu
+
+Transient interface For Flymenu.
+
+** Installation
+
+Emacs >= 28.1 is required.
+
+*** Manual
+
+Download the source code and put it wherever you like, e.g. into =~/.emacs.d/flymenu/=
+
+#+begin_src shell :eval no
+git clone https://github.com/KarimAziev/flymenu.git ~/.emacs.d/flymenu/
+#+end_src
+
+Add the downloaded directory to the load path:
+
+#+begin_src elisp :eval no
+(add-to-list 'load-path "~/.emacs.d/flymenu/")
+(require 'flymenu)
+#+end_src
+
+#+begin_src elisp :eval no
+(use-package flymenu
+  :straight (flymenu
+             :repo "KarimAziev/flymenu"
+             :type git
+             :host github))
+#+end_src
+
+** Usage
+
+*** ~M-x flymenu-flymake~
+Menu with flymake commands and enabling/disabling flymake backends. Backends are generated dynamically from currently active checkers and =flymenu-known-flymake-backends=.
+
+*** ~M-x flymenu-backends-menu~
+Menu for toggling flymake backends. Suffixes are generated dynamically from currently active checkers and =flymenu-known-flymake-backends=.
+
+** Customization
+
+*** ~flymenu-known-flymake-backends~
+
+Alist of flymake backends and extra props for suffixes. 
+
+The car =flymake-backend= is a symbol to add or remove to =flymake-diagnostic-functions=.
+
+Default value is:
+
+#+begin_src emacs-lisp
+'((elisp-flymake-byte-compile
+	 (:transient . t)
+	 (:if-mode . emacs-lisp-mode))
+	(elisp-flymake-checkdoc
+	 (:if-mode . emacs-lisp-mode)
+	 (:key . "d")
+	 (:transient . t)))
+#+end_src
