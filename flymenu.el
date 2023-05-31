@@ -53,12 +53,6 @@ Optional cdr is an alist of transient suffix props, e.g. :if-mode,
 					(alist :options ((:key (radio
 																	(const :tag "Auto" auto)
 																	(string :tag "Toggle character ")))
-													 (:description
-														(radio
-														 (const :tag "Auto" auto)
-														 (string :tag "Description")
-														 (function :tag "Custom function")))
-													 (:transient (boolean :tag "Transient" t))
 													 (:command (radio
 																			(const :tag "Auto" nil)
 																			(symbol :tag "Custom Suffix")))))))
@@ -325,8 +319,7 @@ USED-KEYS is used to omit certain keys from usage."
 							(let* ((backend (car cell))
 										 (props (cdr cell))
 										 (name (symbol-name backend))
-										 (key (if (stringp (cdr (assq :key props)))
-															(cdr (assq :key props))))
+										 (key (cdr (assq :key props)))
 										 (cmd (cdr (assq :command props)))
 										 (sym (or cmd
 															(make-symbol (concat
@@ -367,11 +360,14 @@ USED-KEYS is used to omit certain keys from usage."
 																							flymake-diagnostic-functions)
 																				"[X]" "[ ]"))))
 															:transient t)
-												(seq-filter (lambda (it)
-																			(memq (car it)
-																						'(:command :key
-																											 :description)))
-																		props))))
+												(mapcar (pcase-lambda (`(,k . ,v))
+																	(list k v))
+																(seq-remove
+																 (lambda (it)
+																	 (memq (car it)
+																				 '(:command :key
+																										:description)))
+																 props)))))
 						key-shortcuts)))
 
 ;;;###autoload (autoload 'flymenu-backends-menu "flymenu.el" nil t)
