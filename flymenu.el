@@ -6,7 +6,7 @@
 ;; URL: https://github.com/KarimAziev/flymenu
 ;; Version: 0.1.0
 ;; Keywords: lisp tools
-;; Package-Requires: ((emacs "28.1"))
+;; Package-Requires: ((emacs "28.1") (transient "0.4.0"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; This file is NOT part of GNU Emacs.
@@ -32,6 +32,7 @@
 
 
 
+(require 'transient)
 
 (defcustom flymenu-known-flymake-backends	'((elisp-flymake-byte-compile
 																						 (:if-mode . emacs-lisp-mode)
@@ -283,7 +284,7 @@ USED-KEYS is used to omit certain keys from usage."
 										 (seq-remove (pcase-lambda (`(,_k . ,v))
 																	 (stringp (cdr (assq :key v))))
 																 flymenu-known-flymake-backends)))
-						(mapcar 'car key-defined-backends))))
+						(mapcar #'car key-defined-backends))))
 				 (all-used-keys (append
 												 (mapcar (lambda (it)
 																	 (cdr (assq :key (cdr it))))
