@@ -418,7 +418,10 @@ Backends are generated dynamically from currently active checkers and
 										(and (boundp 'flymake-mode)
 												 (symbol-value 'flymake-mode))))
    ("P" "Project diagnostic" flymake-show-project-diagnostics)
-   ("L" "Show logs" flymake-switch-to-log-buffer)]
+   ("L" "Show logs" flymake-switch-to-log-buffer)
+	 ""
+	 ("M-n" "Next error" flymake-goto-next-error :transient t)
+   ("M-p" "Previous error" flymake-goto-prev-error :transient t)]
 	["Toggle checkers"
 	 :setup-children
 	 (lambda (_args)
