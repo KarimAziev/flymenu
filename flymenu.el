@@ -200,7 +200,8 @@ USED-KEYS is a list of keys that shouldn't be used."
                       (when (= min-len 1)
                         random-variants))))
               (while (and
-                      (< (length short) min-len))
+                      (or (< (length short) min-len)
+													(member short shortcuts)))
                 (setq short (concat short (number-to-string (random 10)))))
               (push short shortcuts)
               (push
@@ -212,15 +213,13 @@ USED-KEYS is a list of keys that shouldn't be used."
 
 (defun flymenu-toggle-backend (backend)
 	"Toggle flymake BACKEND."
+	(flymake-mode -1)
 	(if (memq backend flymake-diagnostic-functions)
-      (progn
-        (flymake-mode -1)
-        (remove-hook 'flymake-diagnostic-functions
-                     backend t)
-        (flymake-mode 1))
-    (add-hook 'flymake-diagnostic-functions
-              backend nil t)
-    (flymake-mode 1)))
+      (remove-hook 'flymake-diagnostic-functions backend t)
+		(add-hook 'flymake-diagnostic-functions
+              backend nil t))
+	(flymake-mode 1))
+
 (defun flymenu--pad-right (str limit)
 	"Pad STR with spaces on the right to increase the length to LIMIT."
 	(let ((width (string-width str)))
@@ -285,11 +284,21 @@ USED-KEYS is used to omit certain keys from usage."
 																	 (stringp (cdr (assq :key v))))
 																 flymenu-known-flymake-backends)))
 						(mapcar #'car key-defined-backends))))
-				 (all-used-keys (append
-												 (mapcar (lambda (it)
-																	 (cdr (assq :key (cdr it))))
-																 key-defined-backends)
-												 used-keys))
+				 (all-used-keys
+					(delete-dups (delq nil (append
+																	(mapcar
+																	 (pcase-lambda
+																		 (`(,_k .
+																						,v))
+																		 (when
+																				 (stringp
+																					(cdr
+																					 (assq
+																						:key
+																						v)))
+																			 (cdr (assq :key v))))
+																	 flymenu-known-flymake-backends)
+																	used-keys))))
 				 (shortcuts (flymenu-builder-generate-shortcuts
 										 diags
 										 (lambda (it)
@@ -417,7 +426,7 @@ Backends are generated dynamically from currently active checkers and
 		:inapt-if-not (lambda ()
 										(and (boundp 'flymake-mode)
 												 (symbol-value 'flymake-mode))))
-   ("P" "Project diagnostic" flymake-show-project-diagnostics)
+   ("R" "Project diagnostic" flymake-show-project-diagnostics)
    ("L" "Show logs" flymake-switch-to-log-buffer)
 	 ""
 	 ("M-n" "Next error" flymake-goto-next-error :transient t)
