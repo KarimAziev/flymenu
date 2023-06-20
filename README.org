@@ -49,10 +49,10 @@ Default value is:
 
 #+begin_src emacs-lisp
 '((elisp-flymake-byte-compile
-	 (:transient . t)
-	 (:if-mode . emacs-lisp-mode))
-	(elisp-flymake-checkdoc
-	 (:if-mode . emacs-lisp-mode)
-	 (:key . "d")
-	 (:transient . t)))
+   (:transient . t)
+   (:if-mode . emacs-lisp-mode))
+  (elisp-flymake-checkdoc
+   (:if-mode . emacs-lisp-mode)
+   (:key . "d")
+   (:transient . t)))
 #+end_src

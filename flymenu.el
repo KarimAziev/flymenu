@@ -35,28 +35,28 @@
 (require 'transient)
 
 (defcustom flymenu-known-flymake-backends	'((elisp-flymake-byte-compile
-																						 (:if-mode . emacs-lisp-mode)
-																						 (:transient . t))
-																						(elisp-flymake-checkdoc
-																						 (:if-mode . emacs-lisp-mode)
-																						 (:key . "d")
-																						 (:transient . t)))
-	"Alist of (FLYMAKE-BACKEND (TRANSIENT-KEYWORD . VALUE)).
+                                             (:if-mode . emacs-lisp-mode)
+                                             (:transient . t))
+                                            (elisp-flymake-checkdoc
+                                             (:if-mode . emacs-lisp-mode)
+                                             (:key . "d")
+                                             (:transient . t)))
+  "Alist of (FLYMAKE-BACKEND (TRANSIENT-KEYWORD . VALUE)).
 The car FLYMAKE-BACKEND is a symbol to add or remove
 to `flymake-diagnostic-functions'.
 Optional cdr is an alist of transient suffix props, e.g. :if-mode,
 :if-derived etc."
-	:group 'flymake
-	:type '(alist
-					:key-type (function :tag "Flymake backend"
-															ignore)
-					:value-type
-					(alist :options ((:key (radio
-																	(const :tag "Auto" auto)
-																	(string :tag "Toggle character ")))
-													 (:command (radio
-																			(const :tag "Auto" nil)
-																			(symbol :tag "Custom Suffix")))))))
+  :group 'flymake
+  :type '(alist
+          :key-type (function :tag "Flymake backend"
+                              ignore)
+          :value-type
+          (alist :options ((:key (radio
+                                  (const :tag "Auto" auto)
+                                  (string :tag "Toggle character ")))
+                           (:command (radio
+                                      (const :tag "Auto" nil)
+                                      (symbol :tag "Custom Suffix")))))))
 
 (defun flymenu-builder-shared-start (s1 s2)
   "Return the longest prefix S1 and S2 have in common."
@@ -94,8 +94,8 @@ Optional cdr is an alist of transient suffix props, e.g. :if-mode,
     word))
 
 (defun flymenu-builder-get-all-key-strategies (word len)
-	"Generate preffered shortcut from WORD with length LEN."
-	(let* ((parts (append (split-string word "[^a-z]" t)
+  "Generate preffered shortcut from WORD with length LEN."
+  (let* ((parts (append (split-string word "[^a-z]" t)
                         (list (replace-regexp-in-string "[^a-z]" "" word))))
          (parts-len (length parts))
          (finalize (lambda (short)
@@ -105,10 +105,10 @@ Optional cdr is an alist of transient suffix props, e.g. :if-mode,
          (vars
           (mapcar finalize (flymenu-builder-capitalize-variants
                             (flymenu-builder-safe-substring len
-																														(replace-regexp-in-string
-																														 "[^a-z]"
-																														 ""
-																														 word))))))
+                                                            (replace-regexp-in-string
+                                                             "[^a-z]"
+                                                             ""
+                                                             word))))))
     (seq-sort-by
      (lambda (it)
        (cond ((string-match-p "[0-9]" it)
@@ -134,8 +134,8 @@ Optional cdr is an alist of transient suffix props, e.g. :if-mode,
                                       (reverse parts))))
                  (number-sequence 1 (min len parts-len))))))))
 (defun flymenu-builder-generate-shortcuts (items &optional key-fn value-fn
-																								 used-keys)
-	"Generate shortcuts from list of ITEMS.
+                                                 used-keys)
+  "Generate shortcuts from list of ITEMS.
 If KEY-FN is nil, ITEMS should be list of strings or symbols.
 If KEY-FN is a function, it will be called with every item of list, and should
 return string that will be as basis for shortcut.
@@ -144,11 +144,11 @@ items.
 If VALUE-FN is non nil, return a list of results of calling VALUE-FN with two
 arguments - generated shortcut and item.
 USED-KEYS is a list of keys that shouldn't be used."
-	(let* ((value-fn (or value-fn (lambda (key value)
-																	(if (proper-list-p value)
-																			(append (list key) value)
-																		(cons key value)))))
-				 (total (length items))
+  (let* ((value-fn (or value-fn (lambda (key value)
+                                  (if (proper-list-p value)
+                                      (append (list key) value)
+                                    (cons key value)))))
+         (total (length items))
          (random-variants (append
                            (mapcar #'char-to-string
                                    (number-sequence (string-to-char
@@ -162,13 +162,13 @@ USED-KEYS is a list of keys that shouldn't be used."
                                                      "Z")))))
          (variants-len (length random-variants))
          (min-len
-					(if used-keys
-							(length (car (seq-sort-by #'length #'> used-keys)))
-						(cond ((>= variants-len total)
-									 1)
-									((>= variants-len (/ total 2))
-									 2)
-									(t 3)))))
+          (if used-keys
+              (length (car (seq-sort-by #'length #'> used-keys)))
+            (cond ((>= variants-len total)
+                   1)
+                  ((>= variants-len (/ total 2))
+                   2)
+                  (t 3)))))
     (let ((shortcuts used-keys)
           (used-words '())
           (result))
@@ -195,61 +195,61 @@ USED-KEYS is a list of keys that shouldn't be used."
                                    #'string-prefix-p it)
                                   shortcuts)))
                      (append
-											(flymenu-builder-get-all-key-strategies word
-																															min-len)
+                      (flymenu-builder-get-all-key-strategies word
+                                                              min-len)
                       (when (= min-len 1)
                         random-variants))))
               (while (and
                       (or (< (length short) min-len)
-													(member short shortcuts)))
+                          (member short shortcuts)))
                 (setq short (concat short (number-to-string (random 10)))))
               (push short shortcuts)
               (push
-							 (cond ((functionp value-fn)
-											(funcall value-fn short def))
-										 (t (cons short def)))
+               (cond ((functionp value-fn)
+                      (funcall value-fn short def))
+                     (t (cons short def)))
                result)))))
       (reverse result))))
 
 (defun flymenu-toggle-backend (backend)
-	"Toggle flymake BACKEND."
-	(flymake-mode -1)
-	(if (memq backend flymake-diagnostic-functions)
+  "Toggle flymake BACKEND."
+  (flymake-mode -1)
+  (if (memq backend flymake-diagnostic-functions)
       (remove-hook 'flymake-diagnostic-functions backend t)
-		(add-hook 'flymake-diagnostic-functions
+    (add-hook 'flymake-diagnostic-functions
               backend nil t))
-	(flymake-mode 1))
+  (flymake-mode 1))
 
 (defun flymenu--pad-right (str limit)
-	"Pad STR with spaces on the right to increase the length to LIMIT."
-	(let ((width (string-width str)))
+  "Pad STR with spaces on the right to increase the length to LIMIT."
+  (let ((width (string-width str)))
     (if (<= width limit)
         str
       (truncate-string-to-width str limit ?\  nil t t))))
 
 (defun flymenu-get-descriptions-width ()
-	"Return align width for flymake backends."
-	(+ 5 (or
-				(apply #'max
-							 (remove nil
-											 (mapcar
-												(lambda (it)
-													(length
-													 (or
-														(let ((descr (cdr
-																					(assq :description
-																								(cdr
-																								 (assq
-																									it
-																									flymenu-known-flymake-backends))))))
-															(when (stringp descr)
-																descr))
-														(symbol-name it))))
-												(remove t
-																(append flymake-diagnostic-functions
-																				(mapcar #'car
-																								flymenu-known-flymake-backends))))))
-				10)))
+  "Return align width for flymake backends."
+  (+ 5 (or
+        (apply #'max
+               (remove nil
+                       (mapcar
+                        (lambda (it)
+                          (length
+                           (or
+                            (let ((descr (cdr
+                                          (assq :description
+                                                (cdr
+                                                 (assq
+                                                  it
+                                                  flymenu-known-flymake-backends))))))
+                              (when (stringp descr)
+                                descr))
+                            (symbol-name it))))
+                        (remove t
+                                (append flymake-diagnostic-functions
+                                        (mapcar #'car
+                                                flymenu-known-flymake-backends))))))
+        10)))
 
 ;;;###autoload
 (defun flymenu-alist-filter (keys plist)
@@ -267,182 +267,182 @@ USED-KEYS is a list of keys that shouldn't be used."
     (cdr result)))
 
 (defun flymenu-get-suffixes (&optional used-keys)
-	"Return list of suffixes for transient.
+  "Return list of suffixes for transient.
 COLUMN determine how to align descriptions.
 USED-KEYS is used to omit certain keys from usage."
-	(let* ((key-defined-backends (seq-filter
-																(lambda (it)
-																	(stringp (cdr (assq :key (cdr it)))))
-																flymenu-known-flymake-backends))
-				 (diags
-					(seq-uniq
-					 (seq-difference
-						(append
-						 (remove t flymake-diagnostic-functions)
-						 (mapcar #'car
-										 (seq-remove (pcase-lambda (`(,_k . ,v))
-																	 (stringp (cdr (assq :key v))))
-																 flymenu-known-flymake-backends)))
-						(mapcar #'car key-defined-backends))))
-				 (all-used-keys
-					(delete-dups (delq nil (append
-																	(mapcar
-																	 (pcase-lambda
-																		 (`(,_k .
-																						,v))
-																		 (when
-																				 (stringp
-																					(cdr
-																					 (assq
-																						:key
-																						v)))
-																			 (cdr (assq :key v))))
-																	 flymenu-known-flymake-backends)
-																	used-keys))))
-				 (shortcuts (flymenu-builder-generate-shortcuts
-										 diags
-										 (lambda (it)
-											 (replace-regexp-in-string
-												"flymake\\|check" ""
-												(symbol-name
-												 it)))
-										 (lambda (key value)
-											 (let
-													 ((props
-														 (seq-remove (pcase-lambda (`(,k . ,_v))
-																					 (eq k :key))
-																				 (cdr
-																					(assq value
-																								flymenu-known-flymake-backends)))))
-												 (cons value
-															 (append
-																(list (cons :key key))
-																props))))
-										 all-used-keys))
-				 (key-shortcuts (append key-defined-backends shortcuts))
-				 (align-width (flymenu-get-descriptions-width)))
-		(mapcar (lambda (cell)
-							(let* ((backend (car cell))
-										 (props (cdr cell))
-										 (name (symbol-name backend))
-										 (key (cdr (assq :key props)))
-										 (cmd (cdr (assq :command props)))
-										 (sym (or cmd
-															(make-symbol (concat
-																						"flymenu-toggle-"
-																						name))))
-										 (descr (cdr (assq
-																	:description
-																	props)))
-										 (description
-											(cond ((stringp descr)
-														 descr)
-														((functionp descr)
-														 descr)
-														(t name))))
-								(unless cmd
-									(fset sym `(lambda ()
-															 (interactive)
-															 (ignore-errors
-																 (flymenu-toggle-backend
-																	',backend)))))
-								(append (list key sym
-															:description
-															(if (functionp description)
-																	description
-																`(lambda ()
-																	 (concat
-																		(propertize
-																		 ,(truncate-string-to-width
-																			 (substring-no-properties description)
-																			 align-width
-																			 0 ?\ )
-																		 'face
-																		 (if
-																				 (memq ',backend
-																							 flymake-diagnostic-functions)
-																				 'success nil))
-																		(if (memq ',backend
-																							flymake-diagnostic-functions)
-																				"[X]" "[ ]"))))
-															:transient t)
-												(mapcar (pcase-lambda (`(,k . ,v))
-																	(list k v))
-																(seq-remove
-																 (lambda (it)
-																	 (memq (car it)
-																				 '(:command :key
-																										:description)))
-																 props)))))
-						key-shortcuts)))
+  (let* ((key-defined-backends (seq-filter
+                                (lambda (it)
+                                  (stringp (cdr (assq :key (cdr it)))))
+                                flymenu-known-flymake-backends))
+         (diags
+          (seq-uniq
+           (seq-difference
+            (append
+             (remove t flymake-diagnostic-functions)
+             (mapcar #'car
+                     (seq-remove (pcase-lambda (`(,_k . ,v))
+                                   (stringp (cdr (assq :key v))))
+                                 flymenu-known-flymake-backends)))
+            (mapcar #'car key-defined-backends))))
+         (all-used-keys
+          (delete-dups (delq nil (append
+                                  (mapcar
+                                   (pcase-lambda
+                                     (`(,_k .
+                                            ,v))
+                                     (when
+                                         (stringp
+                                          (cdr
+                                           (assq
+                                            :key
+                                            v)))
+                                       (cdr (assq :key v))))
+                                   flymenu-known-flymake-backends)
+                                  used-keys))))
+         (shortcuts (flymenu-builder-generate-shortcuts
+                     diags
+                     (lambda (it)
+                       (replace-regexp-in-string
+                        "flymake\\|check" ""
+                        (symbol-name
+                         it)))
+                     (lambda (key value)
+                       (let
+                           ((props
+                             (seq-remove (pcase-lambda (`(,k . ,_v))
+                                           (eq k :key))
+                                         (cdr
+                                          (assq value
+                                                flymenu-known-flymake-backends)))))
+                         (cons value
+                               (append
+                                (list (cons :key key))
+                                props))))
+                     all-used-keys))
+         (key-shortcuts (append key-defined-backends shortcuts))
+         (align-width (flymenu-get-descriptions-width)))
+    (mapcar (lambda (cell)
+              (let* ((backend (car cell))
+                     (props (cdr cell))
+                     (name (symbol-name backend))
+                     (key (cdr (assq :key props)))
+                     (cmd (cdr (assq :command props)))
+                     (sym (or cmd
+                              (make-symbol (concat
+                                            "flymenu-toggle-"
+                                            name))))
+                     (descr (cdr (assq
+                                  :description
+                                  props)))
+                     (description
+                      (cond ((stringp descr)
+                             descr)
+                            ((functionp descr)
+                             descr)
+                            (t name))))
+                (unless cmd
+                  (fset sym `(lambda ()
+                               (interactive)
+                               (ignore-errors
+                                 (flymenu-toggle-backend
+                                  ',backend)))))
+                (append (list key sym
+                              :description
+                              (if (functionp description)
+                                  description
+                                `(lambda ()
+                                   (concat
+                                    (propertize
+                                     ,(truncate-string-to-width
+                                       (substring-no-properties description)
+                                       align-width
+                                       0 ?\ )
+                                     'face
+                                     (if
+                                         (memq ',backend
+                                               flymake-diagnostic-functions)
+                                         'success nil))
+                                    (if (memq ',backend
+                                              flymake-diagnostic-functions)
+                                        "[X]" "[ ]"))))
+                              :transient t)
+                        (mapcar (pcase-lambda (`(,k . ,v))
+                                  (list k v))
+                                (seq-remove
+                                 (lambda (it)
+                                   (memq (car it)
+                                         '(:command :key
+                                                    :description)))
+                                 props)))))
+            key-shortcuts)))
 
 ;;;###autoload (autoload 'flymenu-backends-menu "flymenu.el" nil t)
 (transient-define-prefix flymenu-backends-menu ()
-	"Menu for toggling flymake backends.
+  "Menu for toggling flymake backends.
 Suffixes are generated dynamically from currently active checkers and
 `flymenu-known-flymake-backends'."
-	["Flymake"
-	 :setup-children
+  ["Flymake"
+   :setup-children
    (lambda (_args)
      (transient-parse-suffixes
       transient--prefix
-			(apply #'vector
-						 (flymenu-get-suffixes))))])
+      (apply #'vector
+             (flymenu-get-suffixes))))])
 
 ;;;###autoload
 (defun flymenu-toggle-flymake-mode ()
-	"Toggle flymake mode."
-	(interactive)
-	(call-interactively #'flymake-mode)
-	(transient-setup 'flymenu-flymake))
+  "Toggle flymake mode."
+  (interactive)
+  (call-interactively #'flymake-mode)
+  (transient-setup 'flymenu-flymake))
 
 ;;;###autoload (autoload 'flymenu-flymake "flymenu.el" nil t)
 (transient-define-prefix flymenu-flymake ()
-	"Menu with flymake commands and enabling/disabling flymake backends.
+  "Menu with flymake commands and enabling/disabling flymake backends.
 Backends are generated dynamically from currently active checkers and
 `flymenu-known-flymake-backends'."
-	["Flymake"
-	 ("M" flymenu-toggle-flymake-mode
-		:description
-		(lambda ()
-			(let ((on (bound-and-true-p flymake-mode)))
-				(propertize
-				 (concat (truncate-string-to-width
-									"Toggle Flymake Mode"
-									(flymenu-get-descriptions-width)
-									0 ?\ )
-								 (if on "[X]" "[ ]"))
-				 'face
-				 (if
-						 on
-						 'success nil))))
-		:transient nil)
-	 ("C" "Check now" flymake-start
-		:inapt-if-not (lambda ()
-										(and (boundp 'flymake-mode)
-												 (symbol-value 'flymake-mode)))
-		:transient t)
+  ["Flymake"
+   ("M" flymenu-toggle-flymake-mode
+    :description
+    (lambda ()
+      (let ((on (bound-and-true-p flymake-mode)))
+        (propertize
+         (concat (truncate-string-to-width
+                  "Toggle Flymake Mode"
+                  (flymenu-get-descriptions-width)
+                  0 ?\ )
+                 (if on "[X]" "[ ]"))
+         'face
+         (if
+             on
+             'success nil))))
+    :transient nil)
+   ("C" "Check now" flymake-start
+    :inapt-if-not (lambda ()
+                    (and (boundp 'flymake-mode)
+                         (symbol-value 'flymake-mode)))
+    :transient t)
    ("B" "Buffer problems" flymake-show-buffer-diagnostics
-		:inapt-if-not (lambda ()
-										(and (boundp 'flymake-mode)
-												 (symbol-value 'flymake-mode))))
+    :inapt-if-not (lambda ()
+                    (and (boundp 'flymake-mode)
+                         (symbol-value 'flymake-mode))))
    ("R" "Project diagnostic" flymake-show-project-diagnostics)
    ("L" "Show logs" flymake-switch-to-log-buffer)
-	 ""
-	 ("M-n" "Next error" flymake-goto-next-error :transient t)
+   ""
+   ("M-n" "Next error" flymake-goto-next-error :transient t)
    ("M-p" "Previous error" flymake-goto-prev-error :transient t)]
-	["Toggle checkers"
-	 :setup-children
-	 (lambda (_args)
-		 (transient-parse-suffixes
+  ["Toggle checkers"
+   :setup-children
+   (lambda (_args)
+     (transient-parse-suffixes
       transient--prefix
-			(apply #'vector
-						 (flymenu-get-suffixes
-							'("L"
-								"P"
-								"B"
-								"C"
-								"M")))))])
+      (apply #'vector
+             (flymenu-get-suffixes
+              '("L"
+                "P"
+                "B"
+                "C"
+                "M")))))])
 
 (provide 'flymenu)
 ;;; flymenu.el ends here
