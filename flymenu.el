@@ -221,7 +221,8 @@ dynamic menus that adapt to the current editing context."
     (dotimes (i (length parts))
       (let ((val (string-join (remove nil (list
                                            (when (> i 0)
-                                             (string-join (seq-take parts i) ""))
+                                             (string-join
+                                              (seq-take parts i) ""))
                                            (upcase (nth i parts))
                                            (string-join (seq-drop parts (1+ i))
                                                         "")))
@@ -243,15 +244,17 @@ dynamic menus that adapt to the current editing context."
          (parts-len (length parts))
          (finalize (lambda (short)
                      (while (> len (length short))
-                       (setq short (concat short (number-to-string (random 10)))))
+                       (setq short (concat short (number-to-string
+                                                  (random 10)))))
                      (flymenu-builder-safe-substring len short)))
          (vars
           (mapcar finalize (flymenu-builder-capitalize-variants
-                            (flymenu-builder-safe-substring len
-                                                            (replace-regexp-in-string
-                                                             "[^a-z]"
-                                                             ""
-                                                             word))))))
+                            (flymenu-builder-safe-substring
+                             len
+                             (replace-regexp-in-string
+                              "[^a-z]"
+                              ""
+                              word))))))
     (seq-sort-by
      (lambda (it)
        (cond ((string-match-p "[0-9]" it)
@@ -436,11 +439,12 @@ Optional argument USED-KEYS is a list of keys that shouldn't be used."
                      (lambda (key value)
                        (let
                            ((props
-                             (seq-remove (pcase-lambda (`(,k . ,_v))
-                                           (eq k :key))
-                                         (cdr
-                                          (assq value
-                                                flymenu-known-flymake-backends)))))
+                             (seq-remove
+                              (pcase-lambda (`(,k . ,_v))
+                                (eq k :key))
+                              (cdr
+                               (assq value
+                                     flymenu-known-flymake-backends)))))
                          (cons value
                                (append
                                 (list (cons :key key))
