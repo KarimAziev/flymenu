@@ -1,12 +1,41 @@
-* flymenu
+#+OPTIONS: ^:nil tags:nil num:nil
 
-Transient interface for Flymenu.
+* About
 
-** Installation
+Transient interface for flymenu.
 
-Emacs >= 28.1 is required.
+* Table of Contents                                       :TOC_2_gh:QUOTE:
+#+BEGIN_QUOTE
+- [[#about][About]]
+- [[#requirements][Requirements]]
+- [[#installation][Installation]]
+  - [[#with-use-package-and-straightel][With use-package and straight.el]]
+  - [[#manual-installation][Manual installation]]
+- [[#usage][Usage]]
+- [[#customization][Customization]]
+#+END_QUOTE
 
-*** Manual
+* Requirements
+
+| Name        | Version |
+|-------------+---------|
+| Emacs       |    28.1 |
+| ~transient~ |   0.4.0 |
+
+
+* Installation
+
+** With use-package and straight.el
+#+begin_src elisp :eval no
+(use-package flymenu
+  :straight (flymenu
+             :repo "KarimAziev/flymenu"
+             :type git
+             :host github)
+  :commands (flymenu-flymake))
+#+end_src
+
+** Manual installation
 
 Download the source code and put it wherever you like, e.g. into =~/.emacs.d/flymenu/=
 
@@ -21,33 +50,21 @@ Add the downloaded directory to the load path:
 (require 'flymenu)
 #+end_src
 
-#+begin_src elisp :eval no
-(use-package flymenu
-  :straight (flymenu
-             :repo "KarimAziev/flymenu"
-             :type git
-             :host github))
-#+end_src
 
-** Usage
+* Usage
+Flymenu is designed to be intuitive and easy to use, so simply invoke the
+~M-x flymenu-flymake~ to open a menu with Flymake commands and options for enabling/disabling Flymake backends. The backends are generated dynamically based on the currently active checkers and the contents of =flymenu-known-flymake-backends=.
 
-*** ~M-x flymenu-flymake~
-Menu with flymake commands and enabling/disabling flymake backends. Backends are generated dynamically from currently active checkers and =flymenu-known-flymake-backends=.
-
-*** ~M-x flymenu-backends-menu~
-Menu for toggling flymake backends. Suffixes are generated dynamically from currently active checkers and =flymenu-known-flymake-backends=.
-
-** Customization
+* Customization
 
 *** ~flymenu-known-flymake-backends~
+Alist of known Flymake backends with transient properties.
 
-Alist of flymake backends and extra props for suffixes. 
-
-The car =flymake-backend= is a symbol to add or remove to =flymake-diagnostic-functions=.
+Each entry in the list is a cons cell, where the car is a Flymake backend - a function that can be added to =flymake-diagnostic-functions=, and the cdr is a list of transient properties for that backend.
 
 Default value is:
 
-#+begin_src emacs-lisp
+#+begin_src elisp
 '((elisp-flymake-byte-compile
    (:transient . t)
    (:if-mode . emacs-lisp-mode))

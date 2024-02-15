@@ -26,7 +26,17 @@
 
 ;;; Commentary:
 
-;; Transient interface for flymenu
+;; Flymenu provides a convenient transient interface for managing Flymake backends.
+;;
+;; Usage:
+;; - M-x flymenu-flymake: Open the Flymake operations menu.
+;; - M-x flymenu-backends-menu: Open the Flymake backends menu.
+;;
+;; Flymenu is customizable and allows users to define their own Flymake
+;; backends with associated transient properties.
+
+;; See the documentation for `flymenu-known-flymake-backends' for more details
+;; on how to extend Flymenu with custom backends.
 
 ;;; Code:
 
@@ -509,9 +519,9 @@ Optional argument USED-KEYS is a list of keys that shouldn't be used."
 
 ;;;###autoload (autoload 'flymenu-backends-menu "flymenu.el" nil t)
 (transient-define-prefix flymenu-backends-menu ()
-  "Menu for toggling flymake backends.
+  "Menu for toggling Flymake backends.
 
-Suffixes are generated dynamically from currently active checkers and
+Suffixes are generated dynamically from currently active backends and
 `flymenu-known-flymake-backends'."
   ["Flymake"
    :setup-children
@@ -551,9 +561,10 @@ are to be extracted."
 
 ;;;###autoload (autoload 'flymenu-flymake "flymenu.el" nil t)
 (transient-define-prefix flymenu-flymake ()
-  "Menu with flymake commands and enabling/disabling flymake backends.
-Backends are generated dynamically from currently active checkers and
-`flymenu-known-flymake-backends'."
+  "A menu for Flymake operations and settings.
+
+The available backends are dynamically generated based on the currently active
+checkers and the `flymenu-known-flymake-backends' list."
   ["Flymake"
    ("M" flymenu-toggle-flymake-mode
     :description
