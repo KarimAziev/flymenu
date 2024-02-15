@@ -391,10 +391,31 @@ Suffixes are generated dynamically from currently active checkers and
 
 ;;;###autoload
 (defun flymenu-toggle-flymake-mode ()
-  "Toggle flymake mode."
+  "Toggle Flymake mode and set up its transient menu."
   (interactive)
   (call-interactively #'flymake-mode)
   (transient-setup 'flymenu-flymake))
+
+(defun flymenu--extract-keys-from-layout (layout)
+  "Extract keys from a transient layout.
+
+Argument LAYOUT is a list structure representing the key layout from which keys
+are to be extracted."
+  (let ((res)
+        (stack (seq-remove #'not layout)))
+    (while stack
+      (let ((curr (pop stack))
+            (key))
+        (pcase curr
+          ((pred (vectorp))
+           (push (append curr nil) stack))
+          ((pred (not (listp)))
+           nil)
+          ((guard (setq key (plist-get curr :key)))
+           (push key res))
+          ((guard curr)
+           (setq stack (append stack curr))))))
+    res))
 
 ;;;###autoload (autoload 'flymenu-flymake "flymenu.el" nil t)
 (transient-define-prefix flymenu-flymake ()
@@ -433,16 +454,23 @@ Backends are generated dynamically from currently active checkers and
    ("M-p" "Previous error" flymake-goto-prev-error :transient t)]
   ["Toggle checkers"
    :setup-children
-   (lambda (_args)
-     (transient-parse-suffixes
-      transient--prefix
-      (apply #'vector
-             (flymenu-get-suffixes
-              '("L"
-                "P"
-                "B"
-                "C"
-                "M")))))])
+   (lambda (&rest _)
+     (let ((used-keys
+            (condition-case nil
+                (seq-remove
+                 (apply-partially #'string-match-p
+                                  "\\`\\(\\(C-[chx] \\|M-[gso] \\)\\([CM]-\\)?\\|.+-\\)")
+                 (reverse
+                  (flymenu--extract-keys-from-layout
+                   (get
+                    'flymenu-flymake
+                    'transient--layout))))
+              (error '("M" "C" "B" "R" "L")))))
+       (transient-parse-suffixes
+        transient--prefix
+        (apply #'vector
+               (flymenu-get-suffixes
+                used-keys)))))])
 
 (provide 'flymenu)
 ;;; flymenu.el ends here
