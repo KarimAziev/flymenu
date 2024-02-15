@@ -30,11 +30,9 @@
 
 ;;; Code:
 
-
-
 (require 'transient)
 
-(defcustom flymenu-known-flymake-backends	'((elisp-flymake-byte-compile
+(defcustom flymenu-known-flymake-backends '((elisp-flymake-byte-compile
                                              (:if-mode . emacs-lisp-mode)
                                              (:transient . t))
                                             (elisp-flymake-checkdoc
@@ -49,7 +47,7 @@ Optional cdr is an alist of transient suffix props, e.g. :if-mode,
   :group 'flymake
   :type '(alist
           :key-type (function :tag "Flymake backend"
-                              ignore)
+                     ignore)
           :value-type
           (alist :options ((:key (radio
                                   (const :tag "Auto" auto)
@@ -133,6 +131,7 @@ Optional cdr is an alist of transient suffix props, e.g. :if-mode,
                                        #'flymenu-builder-safe-substring n)
                                       (reverse parts))))
                  (number-sequence 1 (min len parts-len))))))))
+
 (defun flymenu-builder-generate-shortcuts (items &optional key-fn value-fn
                                                  used-keys)
   "Generate shortcuts from list of ITEMS.
@@ -236,22 +235,24 @@ USED-KEYS is a list of keys that shouldn't be used."
                         (lambda (it)
                           (length
                            (or
-                            (let ((descr (cdr
-                                          (assq :description
-                                                (cdr
-                                                 (assq
-                                                  it
-                                                  flymenu-known-flymake-backends))))))
+                            (let ((descr
+                                   (cdr
+                                    (assq :description
+                                          (cdr
+                                           (assq
+                                            it
+                                            flymenu-known-flymake-backends))))))
                               (when (stringp descr)
                                 descr))
                             (symbol-name it))))
                         (remove t
-                                (append flymake-diagnostic-functions
-                                        (mapcar #'car
-                                                flymenu-known-flymake-backends))))))
+                                (append
+                                 flymake-diagnostic-functions
+                                 (mapcar #'car
+                                         flymenu-known-flymake-backends))))))
         10)))
 
-;;;###autoload
+
 (defun flymenu-alist-filter (keys plist)
   "Remove KEYS and values from PLIST."
   (let* ((result (list 'head))
@@ -267,9 +268,9 @@ USED-KEYS is a list of keys that shouldn't be used."
     (cdr result)))
 
 (defun flymenu-get-suffixes (&optional used-keys)
-  "Return list of suffixes for transient.
-COLUMN determine how to align descriptions.
-USED-KEYS is used to omit certain keys from usage."
+  "Generate a list of flymake backend shortcuts and properties.
+
+Optional argument USED-KEYS is a list of keys that shouldn't be used."
   (let* ((key-defined-backends (seq-filter
                                 (lambda (it)
                                   (stringp (cdr (assq :key (cdr it)))))
@@ -289,13 +290,12 @@ USED-KEYS is used to omit certain keys from usage."
                                   (mapcar
                                    (pcase-lambda
                                      (`(,_k .
-                                            ,v))
-                                     (when
-                                         (stringp
-                                          (cdr
-                                           (assq
-                                            :key
-                                            v)))
+                                        ,v))
+                                     (when (stringp
+                                            (cdr
+                                             (assq
+                                              :key
+                                              v)))
                                        (cdr (assq :key v))))
                                    flymenu-known-flymake-backends)
                                   used-keys))))
@@ -360,10 +360,10 @@ USED-KEYS is used to omit certain keys from usage."
                                      'face
                                      (if
                                          (memq ',backend
-                                               flymake-diagnostic-functions)
+                                          flymake-diagnostic-functions)
                                          'success nil))
                                     (if (memq ',backend
-                                              flymake-diagnostic-functions)
+                                         flymake-diagnostic-functions)
                                         "[X]" "[ ]"))))
                               :transient t)
                         (mapcar (pcase-lambda (`(,k . ,v))
@@ -372,13 +372,14 @@ USED-KEYS is used to omit certain keys from usage."
                                  (lambda (it)
                                    (memq (car it)
                                          '(:command :key
-                                                    :description)))
+                                           :description)))
                                  props)))))
             key-shortcuts)))
 
 ;;;###autoload (autoload 'flymenu-backends-menu "flymenu.el" nil t)
 (transient-define-prefix flymenu-backends-menu ()
   "Menu for toggling flymake backends.
+
 Suffixes are generated dynamically from currently active checkers and
 `flymenu-known-flymake-backends'."
   ["Flymake"
@@ -434,9 +435,7 @@ Backends are generated dynamically from currently active checkers and
                   0 ?\ )
                  (if on "[X]" "[ ]"))
          'face
-         (if
-             on
-             'success nil))))
+         (if on 'success nil))))
     :transient nil)
    ("C" "Check now" flymake-start
     :inapt-if-not (lambda ()
