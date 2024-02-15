@@ -219,13 +219,6 @@ USED-KEYS is a list of keys that shouldn't be used."
               backend nil t))
   (flymake-mode 1))
 
-(defun flymenu--pad-right (str limit)
-  "Pad STR with spaces on the right to increase the length to LIMIT."
-  (let ((width (string-width str)))
-    (if (<= width limit)
-        str
-      (truncate-string-to-width str limit ?\  nil t t))))
-
 (defun flymenu-get-descriptions-width ()
   "Return align width for flymake backends."
   (+ 5 (or
@@ -251,21 +244,6 @@ USED-KEYS is a list of keys that shouldn't be used."
                                  (mapcar #'car
                                          flymenu-known-flymake-backends))))))
         10)))
-
-
-(defun flymenu-alist-filter (keys plist)
-  "Remove KEYS and values from PLIST."
-  (let* ((result (list 'head))
-         (last result))
-    (while plist
-      (let* ((key (pop plist))
-             (val (pop plist))
-             (new (and (not (memq key keys))
-                       (list key val))))
-        (when new
-          (setcdr last new)
-          (setq last (cdr new)))))
-    (cdr result)))
 
 (defun flymenu-get-suffixes (&optional used-keys)
   "Generate a list of flymake backend shortcuts and properties.
