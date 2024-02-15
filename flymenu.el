@@ -39,22 +39,167 @@
                                              (:if-mode . emacs-lisp-mode)
                                              (:key . "d")
                                              (:transient . t)))
-  "Alist of (FLYMAKE-BACKEND (TRANSIENT-KEYWORD . VALUE)).
-The car FLYMAKE-BACKEND is a symbol to add or remove
-to `flymake-diagnostic-functions'.
-Optional cdr is an alist of transient suffix props, e.g. :if-mode,
-:if-derived etc."
+  "Alist of known Flymake backends with transient properties.
+
+Each entry in the alist is a cons cell where the car is a Flymake backend -
+the function that can be added to `flymake-diagnostic-functions', and the cdr is
+an alist of transient properties for that backend.
+
+The transient properties can include the following keys:
+
+- `:transient' (boolean): If non-nil, indicates that the backend is transient.
+- `:key' (string): A single character string used as a shortcut key for the
+  backend.
+- `:description' (string or function): A description of the backend. If a
+  function, it should return a string.
+- `:if-mode', `:if-not-mode',`:if-derived', `:if-not-derived' (symbol):
+  Conditionally include or inapt the backend based on the current major mode.
+- `:if-nil', `:if-non-nil', `:inapt-if-nil', `:inapt-if-non-nil' (variable):
+  Conditionally include or inapt the backend based on the truthiness of a
+  variable.
+- `:if', `:if-not', `:inapt-if', `:inapt-if-not' (function, symbol, or sexp):
+  General conditional inclusion based on the evaluation of the provided
+  expression.
+
+Backends are included in the Flymenu based on these properties, allowing for
+dynamic menus that adapt to the current editing context."
   :group 'flymake
   :type '(alist
-          :key-type (function :tag "Flymake backend"
-                     ignore)
+          :key-type (function :tag "Flymake backend" ignore)
           :value-type
-          (alist :options ((:key (radio
-                                  (const :tag "Auto" auto)
-                                  (string :tag "Toggle character ")))
-                           (:command (radio
-                                      (const :tag "Auto" nil)
-                                      (symbol :tag "Custom Suffix")))))))
+          (set
+           :tag "Transient properties"
+           (cons :format "%v"
+            (const
+             :size 24
+             :format ":transient              "
+             :value :transient)
+            (boolean))
+           (cons :format "%v"
+            (const
+             :size 24
+             :format ":key                    "
+             :key)
+            (string))
+           (cons :format "%v"
+            (const
+             :format ":description            "
+             :size 24
+             :description)
+            (choice :value ""
+             (string)
+             (function)))
+           (cons :format "%v"
+            (const
+             :format ":inapt-if-mode          "
+             :size 24
+             :inapt-if-mode)
+            (symbol))
+           (cons :format "%v"
+            (const
+             :format ":inapt-if-not-mode      "
+             :size 24
+             :inapt-if-not-mode)
+            (symbol))
+           (cons :format "%v"
+            (const
+             :format ":inapt-if-derived       "
+             :size 24
+             :inapt-if-derived)
+            (symbol))
+           (cons :format "%v"
+            (const
+             :format ":inapt-if-not-derived   "
+             :size 24
+             :inapt-if-not-derived)
+            (symbol))
+           (cons :format "%v"
+            (const
+             :format ":if-mode                "
+             :size 24
+             :if-mode)
+            (symbol))
+           (cons :format "%v"
+            (const
+             :format ":if-not-mode            "
+             :size 24
+             :if-not-mode)
+            (symbol))
+           (cons :format "%v"
+            (const
+             :format ":if-derived             "
+             :size 24
+             :if-derived)
+            (symbol))
+           (cons :format "%v"
+            (const
+             :format ":if-not-derived         "
+             :size 24
+             :if-not-derived)
+            (symbol))
+           (cons :format "%v"
+            (const
+             :format ":if-nil                 "
+             :size 24
+             :if-nil)
+            (variable))
+           (cons :format "%v"
+            (const
+             :format ":if-non-nil             "
+             :size 24
+             :if-non-nil)
+            (variable))
+           (cons :format "%v"
+            (const
+             :format ":inapt-if-nil           "
+             :size 24
+             :inapt-if-nil)
+            (variable))
+           (cons :format "%v"
+            (const
+             :format ":inapt-if-non-nil       "
+             :size 24
+             :inapt-if-non-nil)
+            (variable))
+           (cons :format "%v"
+            (const
+             :format ":if                     "
+             :size 24
+             :if)
+            (choice :value function
+             (function :tag "Function")
+             (symbol :tag "Symbol")
+             (sexp :tag "Sexp")))
+           (cons :format "%v"
+            (const
+             :format ":if-not                 "
+             :size 24
+             :if-not)
+            (choice :value function
+             (function :tag "Function")
+             (symbol :tag "Symbol")
+             (sexp :tag "Sexp")))
+           (cons :format "%v"
+            (const
+             :format ":inapt-if-nil           "
+             :size 24
+             :inapt-if-nil)
+            (choice :value function
+             (function :tag "Function")
+             (symbol :tag "Symbol")
+             (sexp :tag "Sexp")))
+           (cons :format "%v"
+            (const
+             :format ":inapt-if-non-nil       "
+             :size 24
+             :inapt-if-non-nil)
+            (choice :value function
+             (function :tag "Function")
+             (symbol :tag "Symbol")
+             (sexp :tag "Sexp")))
+           (cons  :format "%v"
+            (symbol :tag "Other")
+            (sexp)))))
 
 (defun flymenu-builder-shared-start (s1 s2)
   "Return the longest prefix S1 and S2 have in common."
