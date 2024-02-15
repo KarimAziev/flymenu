@@ -222,27 +222,31 @@ USED-KEYS is a list of keys that shouldn't be used."
 (defun flymenu-get-descriptions-width ()
   "Return align width for flymake backends."
   (+ 5 (or
-        (apply #'max
-               (remove nil
-                       (mapcar
-                        (lambda (it)
-                          (length
-                           (or
-                            (let ((descr
-                                   (cdr
-                                    (assq :description
-                                          (cdr
-                                           (assq
-                                            it
-                                            flymenu-known-flymake-backends))))))
-                              (when (stringp descr)
-                                descr))
-                            (symbol-name it))))
-                        (remove t
-                                (append
-                                 flymake-diagnostic-functions
-                                 (mapcar #'car
-                                         flymenu-known-flymake-backends))))))
+        (when-let
+            ((descriptions
+              (delq nil
+                    (mapcar
+                     (lambda (it)
+                       (length
+                        (or
+                         (let
+                             ((descr
+                               (cdr
+                                (assq :description
+                                      (cdr
+                                       (assq
+                                        it
+                                        flymenu-known-flymake-backends))))))
+                           (when (stringp descr)
+                             descr))
+                         (symbol-name it))))
+                     (remove
+                      t
+                      (append
+                       flymake-diagnostic-functions
+                       (mapcar #'car
+                               flymenu-known-flymake-backends)))))))
+          (apply #'max descriptions))
         10)))
 
 (defun flymenu-get-suffixes (&optional used-keys)

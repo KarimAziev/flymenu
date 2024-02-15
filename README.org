@@ -1,6 +1,6 @@
 * flymenu
 
-Transient interface For Flymenu.
+Transient interface for Flymenu.
 
 ** Installation
 
