@@ -527,7 +527,7 @@ Suffixes are generated dynamically from currently active backends and
    :setup-children
    (lambda (_args)
      (transient-parse-suffixes
-      transient--prefix
+      (oref transient--prefix command)
       (apply #'vector
              (flymenu-get-suffixes))))])
 
@@ -608,7 +608,7 @@ checkers and the `flymenu-known-flymake-backends' list."
                     'transient--layout))))
               (error '("M" "C" "B" "R" "L")))))
        (transient-parse-suffixes
-        transient--prefix
+        (oref transient--prefix command)
         (apply #'vector
                (flymenu-get-suffixes
                 used-keys)))))])
