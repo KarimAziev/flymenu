@@ -524,6 +524,7 @@ Optional argument USED-KEYS is a list of keys that shouldn't be used."
 Suffixes are generated dynamically from currently active backends and
 `flymenu-known-flymake-backends'."
   ["Flymake"
+   :class transient-column
    :setup-children
    (lambda (_args)
      (transient-parse-suffixes
@@ -594,6 +595,7 @@ checkers and the `flymenu-known-flymake-backends' list."
    ("M-n" "Next error" flymake-goto-next-error :transient t)
    ("M-p" "Previous error" flymake-goto-prev-error :transient t)]
   ["Toggle checkers"
+   :class transient-column
    :setup-children
    (lambda (&rest _)
      (let ((used-keys
