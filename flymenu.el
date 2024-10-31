@@ -407,6 +407,30 @@ USED-KEYS is a list of keys that shouldn't be used."
           (apply #'max descriptions))
         10)))
 
+(defun flymenu--alist-to-plist (alist)
+  "Convert an association list ALIST to a property list.
+
+Argument ALIST is an association list to be converted into a property list."
+  (apply #'append
+         (mapcar (lambda (pair)
+                   (list (car pair)
+                         (cdr pair)))
+                 alist)))
+
+(defun flymenu--plist-remove (keys plist)
+  "Remove KEYS and values from PLIST."
+  (let* ((result (list 'head))
+         (last result))
+    (while plist
+      (let* ((key (pop plist))
+             (val (pop plist))
+             (new (and (not (memq key keys))
+                       (list key val))))
+        (when new
+          (setcdr last new)
+          (setq last (cdr new)))))
+    (cdr result)))
+
 (defun flymenu-get-suffixes (&optional used-keys)
   "Generate a list of flymake backend shortcuts and properties.
 
@@ -447,14 +471,13 @@ Optional argument USED-KEYS is a list of keys that shouldn't be used."
                         (symbol-name
                          it)))
                      (lambda (key value)
-                       (let
-                           ((props
-                             (seq-remove
-                              (pcase-lambda (`(,k . ,_v))
-                                (eq k :key))
-                              (cdr
-                               (assq value
-                                     flymenu-known-flymake-backends)))))
+                       (let ((props
+                              (seq-remove
+                               (pcase-lambda (`(,k . ,_v))
+                                 (eq k :key))
+                               (cdr
+                                (assq value
+                                      flymenu-known-flymake-backends)))))
                          (cons value
                                (append
                                 (list (cons :key key))
@@ -487,34 +510,31 @@ Optional argument USED-KEYS is a list of keys that shouldn't be used."
                                (ignore-errors
                                  (flymenu-toggle-backend
                                   ',backend)))))
-                (append (list key sym
-                              :description
-                              (if (functionp description)
-                                  description
-                                `(lambda ()
-                                   (concat
-                                    (propertize
-                                     ,(truncate-string-to-width
-                                       (substring-no-properties description)
-                                       align-width
-                                       0 ?\ )
-                                     'face
-                                     (if
-                                         (memq ',backend
-                                          flymake-diagnostic-functions)
-                                         'success nil))
-                                    (if (memq ',backend
-                                         flymake-diagnostic-functions)
-                                        "[X]" "[ ]"))))
-                              :transient t)
-                        (mapcar (pcase-lambda (`(,k . ,v))
-                                  (list k v))
-                                (seq-remove
-                                 (lambda (it)
-                                   (memq (car it)
-                                         '(:command :key
-                                           :description)))
-                                 props)))))
+                (let ((mapped-props (flymenu--plist-remove '(:command :key
+                                                             :description)
+                                                           (flymenu--alist-to-plist
+                                                            props))))
+                  (append (list key sym
+                                :description
+                                (if (functionp description)
+                                    description
+                                  `(lambda ()
+                                     (concat
+                                      (propertize
+                                       ,(truncate-string-to-width
+                                         (substring-no-properties description)
+                                         align-width
+                                         0 ?\ )
+                                       'face
+                                       (if
+                                           (memq ',backend
+                                            flymake-diagnostic-functions)
+                                           'success nil))
+                                      (if (memq ',backend
+                                           flymake-diagnostic-functions)
+                                          "[X]" "[ ]"))))
+                                :transient t)
+                          mapped-props))))
             key-shortcuts)))
 
 ;;;###autoload (autoload 'flymenu-backends-menu "flymenu.el" nil t)
@@ -598,22 +618,24 @@ checkers and the `flymenu-known-flymake-backends' list."
    :class transient-column
    :setup-children
    (lambda (&rest _)
-     (let ((used-keys
-            (condition-case nil
-                (seq-remove
-                 (apply-partially #'string-match-p
-                                  "\\`\\(\\(C-[chx] \\|M-[gso] \\)\\([CM]-\\)?\\|.+-\\)")
-                 (reverse
-                  (flymenu--extract-keys-from-layout
-                   (get
-                    'flymenu-flymake
-                    'transient--layout))))
-              (error '("M" "C" "B" "R" "L")))))
+     (let* ((used-keys
+             (condition-case nil
+                 (seq-remove
+                  (apply-partially
+                   #'string-match-p
+                   "\\`\\(\\(C-[chx] \\|M-[gso] \\)\\([CM]-\\)?\\|.+-\\)")
+                  (reverse
+                   (flymenu--extract-keys-from-layout
+                    (get
+                     'flymenu-flymake
+                     'transient--layout))))
+               (error '("M" "C" "B" "R" "L"))))
+            (suffixes (flymenu-get-suffixes
+                       used-keys)))
        (transient-parse-suffixes
         (oref transient--prefix command)
         (apply #'vector
-               (flymenu-get-suffixes
-                used-keys)))))])
+               suffixes))))])
 
 (provide 'flymenu)
 ;;; flymenu.el ends here
