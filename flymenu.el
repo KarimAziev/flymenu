@@ -380,7 +380,7 @@ USED-KEYS is a list of keys that shouldn't be used."
 (defun flymenu-get-descriptions-width ()
   "Return align width for flymake backends."
   (+ 5 (or
-        (when-let
+        (when-let*
             ((descriptions
               (delq nil
                     (mapcar
